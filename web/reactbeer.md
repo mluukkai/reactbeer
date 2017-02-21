@@ -359,7 +359,7 @@ ensimmäinen _then_ parsii metodin json-muotoisen vastauksen ja toinen _then_ si
 
 Operaatio ei kuitenkaan toimi, selaimen konsoliin tulee seuraava virheilmoitus
 
-![kuva](https://github.com/mluukkai/reactbeer/raw/master/images/reactbeer1.png)
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer1.png)
 
 
 [x](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
