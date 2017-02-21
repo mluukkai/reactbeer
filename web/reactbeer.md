@@ -1,8 +1,16 @@
 # ReactBeer
 
-React on noussut ...
+Tässä itseopiskelumateriaalissa tehdään  Web-palvelinohjelmointi Ruby on Rails -kurssilta tutulle [ratebeer](https://github.com/mluukkai/WebPalvelinohjelmointi2017)-sovellukselle selaimessa toimiva frontend tällä hetkellä erittäin suosittua [React](https://facebook.github.io/react/)-kirjastoa käyttäen.
 
-## Tutustuminen reactiin
+Materiaali toiminee parhaiten siten, että rakennat sovellusta itse samalla materiaalia seuraten.
+
+## Tutustuminen Reactiin
+
+Internet on täynnä eritasoisia React-tutoriaaleja ja sen takia tässä materiaalissa ei käydä perusteita läpi vaan oletetaan että opiskelet omatoimisesti Reactin perusteet.
+
+Eräs hyvä tapa oppia perusteet on [Egghead.io](https://egghead.io):n kurssi [Start Using React to Build Web Applications](https://egghead.io/courses/react-fundamentals) joka koostuu noin 66 minuutista lyhyitä videoita. Videot kannattaa katsoa alusta videoon "Use map to Create React Components from Arrays of Data" asti. Seuraavat videot eivät ole kovin oleellisia, mutta viimeinen, eli "Debug React Components with Developer Tools in Chrome" kannattaa ehdottomasti katsoa.
+
+Reactia ohjelmoidaan yleensä javascriptin uudella vesiolla [ES6](http://es6-features.org/#Constants):lla. Jos ES6 tuntuu oudolta, löytyy siihenkin Egghead.io:sta sopiva [kurssi](https://egghead.io/courses/learn-es6-ecmascript-2015)
 
 ## Projektin luominen
 
