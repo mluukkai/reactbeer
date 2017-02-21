@@ -280,6 +280,7 @@ import {
   Nav,
   NavItem,
   NavLink,
+  Container
 } from 'reactstrap';
 ```
 
@@ -311,9 +312,57 @@ class Header extends React.Component {
 }
 ```
 
+Muutetaan App-komponentin render-metodia vielä lisäämällä kaikki headerin ulkopuolella olevat komponentit reactstrap-komponentin _Container_ alle:
+
+```js
+    return (
+      <div>
+        <Header 
+          beers={this.setVisible("BeersPage").bind(this)}
+          styles={this.setVisible("StylesPage").bind(this)}
+          login={this.setVisible("LoginPage").bind(this)}
+        />
+        <Container>
+          {visiblePageComponent()}
+        </Container>
+      </div>
+    );
+```
+
 Ohjeet reactstrap-komponenttien käyttöön löytyvät [täältä](https://reactstrap.github.io/components/)
 
-## Tyylien hakeminen palvelimelta
+## Oluttyylien hakeminen palvelimelta
+
+Käynnistetään rails-sovellus oletusportin (jota react-fronend käyttää) sijaan porttiin 3001 antamalla komento `rails s -p 3001`.
+
+Pääsemme käsiksi tyylien listaan json-muodossa osoitteessa <http://localhost:3001/styles.json>. Haetaan nyt json-muotoinen tyylien lista react-sovellukseen ja näytetään ne käyttäjälle HTML:ksi muotoiltuna.
+
+React-sovelluksissa hyvänä käytäntönä on pitää suurin osa komponenteista tilattomana ja keskittää tila mahdollisimman ylhäällä hierarkiassa olevaan komponenttiin. Päätetäänkin tallentaa palvelimelta haettu tyylien lista komponenttiin _App_.
+
+Hyvä paikka suorittaa tyylien hakeminen palvelimelta on metodi [componentWillMount](https://facebook.github.io/react/docs/react-component.html#componentwillmount) joka suoritetaan hieman ennen kun komponentti renderöidään ensimmäistä kertaa.
+
+Metodi käyttää modernien selaimien tulemaa [fetch-api](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API):a tietojen hakemiseen. Metodi näyttää seuraavalta:
+
+
+```js
+  componentWillMount() {
+    fetch('http://localhost:3001/styles.json')
+     .then( response => response.json() )
+     .then( results => {
+        this.setState({
+          styles: results
+        })
+     })
+  }  
+```
+ensimmäinen _then_ parsii metodin json-muotoisen vastauksen ja toinen _then_ sijoittaa vastaanotetun listan komponentin tilan avaimen _styles_ arvoksi.
+
+Operaatio ei kuitenkaan toimi, selaimen konsoliin tulee seuraava virheilmoitus
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/images/reactbeer1.png)
+
+
+[x](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
 
 ```js
 ```
@@ -324,9 +373,10 @@ Ohjeet reactstrap-komponenttien käyttöön löytyvät [täältä](https://react
 ```js
 ```
 
-```js
-```
+## Uuden oluttyylin lisääminen 
 
-```js
-```
+## Kirjautuminen palvelimelle
+
+## Deployment
+
 
