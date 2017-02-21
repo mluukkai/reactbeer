@@ -337,7 +337,20 @@ Käynnistetään rails-sovellus oletusportin (jota react-fronend käyttää) sij
 
 Pääsemme käsiksi tyylien listaan json-muodossa osoitteessa <http://localhost:3001/styles.json>. Haetaan nyt json-muotoinen tyylien lista react-sovellukseen ja näytetään ne käyttäjälle HTML:ksi muotoiltuna.
 
-React-sovelluksissa hyvänä käytäntönä on pitää suurin osa komponenteista tilattomana ja keskittää tila mahdollisimman ylhäällä hierarkiassa olevaan komponenttiin. Päätetäänkin tallentaa palvelimelta haettu tyylien lista komponenttiin _App_.
+React-sovelluksissa hyvänä käytäntönä on pitää suurin osa komponenteista tilattomana ja keskittää tila mahdollisimman ylhäällä hierarkiassa olevaan komponenttiin. Päätetäänkin tallentaa palvelimelta haettu tyylien lista komponenttiin _App_. Alustetaan tyylien lista App:in konstruktorissa tyhjäksi:
+
+```js
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      visible: "StylesPage",
+      styles: []
+    }
+  }
+  // ...
+}
+```
 
 Hyvä paikka suorittaa tyylien hakeminen palvelimelta on metodi [componentWillMount](https://facebook.github.io/react/docs/react-component.html#componentwillmount) joka suoritetaan hieman ennen kun komponentti renderöidään ensimmäistä kertaa.
 
@@ -349,31 +362,139 @@ Metodi käyttää modernien selaimien tulemaa [fetch-api](https://developer.mozi
     fetch('http://localhost:3001/styles.json')
      .then( response => response.json() )
      .then( results => {
+        console.log(results)
         this.setState({
           styles: results
         })
      })
   }  
 ```
-ensimmäinen _then_ parsii metodin json-muotoisen vastauksen ja toinen _then_ sijoittaa vastaanotetun listan komponentin tilan avaimen _styles_ arvoksi.
+ensimmäinen _then_ parsii metodin json-muotoisen vastauksen ja toinen _then_ tulostaa ensin vastaanotetun listan konsoliin ja sijoittaa sen tilan avaimen _styles_ arvoksi.
 
 Operaatio ei kuitenkaan toimi, selaimen konsoliin tulee seuraava virheilmoitus
 
 ![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer1.png)
 
+Ongelman syy selitetään [täällä](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) ja korjaus on siis sallia Rails-sovelluksessa cross-domain-pyynnöt.
 
-[x](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
+Kyseessä on helppo operaatio gemin [rack-cors](https://github.com/cyu/rack-cors) asennus ja pieni muutos tiedostoon _application.rb_ (ks. linkki) riittää. Tehdään muutokset ja käynnistetään rails-sovellus uudelleen.
+
+Nyt operaatio toimii ja vastaanotetut Style-oliot tulostuvat konsoliin.
+
+Välitetään tyylien lista _StylesPage_-komponentille, eli muutetaan komonentit muodostava apumetodi seuraavaan mutoon:
 
 ```js
+    let visiblePageComponent = () => { 
+      if ( this.state.visible=="BeersPage" ) {
+        return <BeersPage />
+      } else if ( this.state.visible=="StylesPage" ) {
+        return <StylesPage styles={this.state.styles}/>
+      } else  {
+        return <LoginPage />
+      }     
+    }
 ```
 
-```js
-```
+tyylisivu pääsee käsiksi välitettyyn oluiden listaan _propsien_ avulla. Laitetaan komponentti tulostamaan aluksi tyylien lukumäärä:
 
 ```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        {styles.length}      
+      </div>
+    )
+  }
+}
+```
+
+Muutetaan sitten komponenttia siten, että se muodostaa taulukon, jonka rivit sisältävät tyylin nimen:
+
+```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        <Table striped>
+          <thead>
+            <tr>
+              <th>name</th>
+            </tr>
+          </thead>
+          <tbody>
+            { styles.map(s => <tr><td>{s.name}</td></tr> ) }    
+          </tbody>
+        </Table>  
+      </div>
+    )
+  }
+}
+```
+
+Huomaa, että käytössä on reactstrap-komponentti [Table](https://reactstrap.github.io/components/tables/) joka siis on toimiakseen importattava.
+
+Sivu toimii, mutta konsoliin tulee seuraava valitus:
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer2.png)
+
+Syy ongelmaan selviää [täältä](https://facebook.github.io/react/docs/lists-and-keys.html#keys).
+
+Ongelmasta päästään eroon lisäämälle tyylin muodostavalle riville avaimeksi (_key_) tyylin id.
+
+```js
+{ styles.map(s => <tr key={s.id}><td>{s.name}</td></tr> ) } 
+```
+
+## const-elementti
+
+Reactissa on hyvänä käytänteenä eristää kaikki loogiset kokonaisuudet omaksi komponentiksi. Tehdään nyt yksittäisen tyylin renderöinnistä huolehtiva komponentti. Koska komponentti on niin yksinkertainen, määrittelemme sen _const_- eli vakiokomponentiksi, joka teknisesti ottaen sisältää ainoastaan renderöinnin suorittavan metodin määrittelyn:
+
+```js
+const Style = (props) => 
+  <tr>
+    <td>{props.style.name}</td>
+    <td>{props.style.description}</td>
+  </tr> 
+```
+
+Const-komponenttia käytetään normaalin komponentin tapaan. _StylesPage_ muuttuu seuraavasti:
+
+```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        <Table striped>
+          <thead>
+            <tr>
+              <th>name</th>
+              <th>description</th>
+            </tr>
+          </thead>
+          <tbody>
+            { styles.map(s => <Style key={s.id} style={s}/> ) }    
+          </tbody>
+        </Table>  
+      </div>
+    )
+  }
+}
 ```
 
 ## Uuden oluttyylin lisääminen 
+
+```js
+```
+
+```js
+```
 
 ## Kirjautuminen palvelimelle
 
