@@ -16,7 +16,7 @@ Reactia ohjelmoidaan yleensä javascriptin uudella vesiolla [ES6](http://es6-fea
 
 ## Projektin luominen
 
-Luodaan projekti [create-react-app]() sovellusta käyttäen ja käynnistetään sovellus komennolla `npm start` 
+Luodaan projekti [create-react-app]() -sovellusta käyttäen ja käynnistetään sovellus komennolla `npm start` 
 
 Poistetaan ylimääräiset tiedostot ja otetaan lähtökohdaksi seuraavat:
 
@@ -68,7 +68,7 @@ export default App;
 
 ## navigaatiorakenne
 
-Itse sovellus siis rakennetaan komponentin App sisälle. Aloitetaan lisäämällä sovelluksellee navigaatiorakenne, jonka avulla valitaan se näkymä (esim. oluet) mikä sivulla näytetään.
+Itse sovellus siis rakennetaan komponentin App sisälle. Aloitetaan lisäämällä sovelluksellee navigaatiorakenne, jonka avulla valitaan se näkymä (esim. oluet), mikä sivulla näytetään.
 
 Tehdän sovellukselle kolme yksinkertaista komponenttia (tehdään tässä vaiheessa kaikki tiedostoon _App.js_):
 
@@ -121,8 +121,7 @@ class App extends Component {
 }
 ```
 
-Haluamme kuitenkin, että komponenteista on näkyvissä yksi kerrallaan. Määritellään sitä varten komponenttin App tilaan avain _visible_, joka arvo kontrolloi 
-näytettävää alikomponenttia. Määritellään myös apumetodi, joka valitsee tilaan perustuen _render_-metodia varten oikean komponentin. 
+Haluamme kuitenkin, että komponenteista on näkyvissä yksi kerrallaan. Määritellään sitä varten komponentin App tilaan avain _visible_, jonka arvo kontrolloi näytettävää alikomponenttia. Määritellään myös apumetodi, joka valitsee tilaan perustuen _render_-metodia varten oikean komponentin. 
 
 ```js
 class App extends Component {
@@ -203,7 +202,7 @@ class App extends Component {
 ```
 
 Headerin linkeille on rekisteröity tapahtumankuuntelijat. Kuuntelijat generoidaan hieman erikoisella tavalla funktion _setVisible_ avulla.
-Käytännössä metodin kutsu vasta palauttaa todellisen tapahtumankuuntelijafunktion:
+Käytännössä vasta metodin kutsu palauttaa todellisen tapahtumankuuntelijafunktion:
 
 ```js
   setVisible(componentName) {
@@ -362,9 +361,9 @@ class App extends Component {
 }
 ```
 
-Hyvä paikka suorittaa tyylien hakeminen palvelimelta on metodi [componentWillMount](https://facebook.github.io/react/docs/react-component.html#componentwillmount) joka suoritetaan hieman ennen kun komponentti renderöidään ensimmäistä kertaa.
+Hyvä paikka suorittaa tyylien hakeminen palvelimelta on metodi [componentWillMount](https://facebook.github.io/react/docs/react-component.html#componentwillmount) joka suoritetaan hieman ennen kuin komponentti renderöidään ensimmäistä kertaa.
 
-Metodi käyttää modernien selaimien tulemaa [fetch-api](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API):a tietojen hakemiseen. Metodi näyttää seuraavalta:
+Metodi käyttää modernien selaimien tukemaa [fetch-api](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API):a tietojen hakemiseen. Metodi näyttää seuraavalta:
 
 
 ```js
@@ -391,7 +390,7 @@ Kyseessä on helppo operaatio gemin [rack-cors](https://github.com/cyu/rack-cors
 
 Nyt operaatio toimii ja vastaanotetut Style-oliot tulostuvat konsoliin.
 
-Välitetään tyylien lista _StylesPage_-komponentille, eli muutetaan komonentit muodostava apumetodi seuraavaan mutoon:
+Välitetään tyylien lista _StylesPage_-komponentille, eli muutetaan komponentit muodostava apumetodi seuraavaan muotoon:
 
 ```js
     let visiblePageComponent = () => { 
@@ -454,7 +453,7 @@ Sivu toimii, mutta konsoliin tulee seuraava valitus:
 
 Syy ongelmaan selviää [täältä](https://facebook.github.io/react/docs/lists-and-keys.html#keys).
 
-Ongelmasta päästään eroon lisäämälle tyylin muodostavalle riville avaimeksi (_key_) tyylin id.
+Ongelmasta päästään eroon lisäämällä tyylin muodostavalle riville avaimeksi (_key_) tyylin id.
 
 ```js
 { styles.map(s => <tr key={s.id}><td>{s.name}</td></tr> ) } 
