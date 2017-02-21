@@ -496,6 +496,8 @@ class StylesPage extends React.Component {
 }
 ```
 
+Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/styles_page)
+
 ## Uuden oluttyylin lisääminen 
 
 ```js
