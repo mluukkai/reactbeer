@@ -263,11 +263,70 @@ class App extends Component {
 
 ## Bootstrap
 
+Tehdään sovelluksen ulkoasusta tyylikkäämpi [Bootstrapin](http://getbootstrap.com) avulla. Käytetään [Reactstrap](https://reactstrap.github.io)-kirjastoa, joka paketoi bootstap-luokkia hyödyntävät html-elementit react-komponenteiksi.
 
+Asenna ja ota kirjasto käyttöön [tämän sivun](https://reactstrap.github.io) kohdan _Adding Bootstrap_ ohjeiden mukaan.
 
+Kuten sivulla mainitaan, tulee käyttävät reactstrap-komponentit importata sovellukseen.
+
+Importataan nyt ainakin seuraavat:
+
+```js
+import {
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  NavLink,
+} from 'reactstrap';
+```
+
+Muutetaan sitten Header-komponenttia seuraavasti:
+
+```js
+class Header extends React.Component {
+  render(){
+    return (
+        <Navbar color="faded" light toggleable>
+          <NavbarToggler right onClick={this.toggle} />
+          <NavbarBrand href="/">reactbeer</NavbarBrand>
+          <Collapse navbar>
+            <Nav className="ml-auto" navbar>
+              <NavItem>
+                <NavLink href="#" onClick={this.props.beers}>Beers</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink href="#" onClick={this.props.styles}>Styles</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink href="#" onClick={this.props.login}>Login</NavLink>
+              </NavItem>              
+            </Nav>
+          </Collapse>
+        </Navbar>      
+    )
+  }
+}
+```
+
+Ohjeet reactstrap-komponenttien käyttöön löytyvät [täältä](https://reactstrap.github.io/components/)
+
+## Tyylien hakeminen palvelimelta
 
 ```js
 ```
 
+```js
+```
 
+```js
+```
+
+```js
+```
+
+```js
+```
 
