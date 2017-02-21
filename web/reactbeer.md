@@ -2,6 +2,8 @@
 
 Tässä itseopiskelumateriaalissa tehdään  Web-palvelinohjelmointi Ruby on Rails -kurssilta tutulle [ratebeer](https://github.com/mluukkai/WebPalvelinohjelmointi2017)-sovellukselle selaimessa toimiva frontend tällä hetkellä erittäin suosittua [React](https://facebook.github.io/react/)-kirjastoa käyttäen.
 
+Materiaalissa tulee esiin myös muutamia oleellisia asioita, joita on huomioitava kun Railsia käytetään JSON-muotoista dataa tarjoavana API:na.
+
 Materiaali toiminee parhaiten siten, että rakennat sovellusta itse samalla materiaalia seuraten.
 
 ## Tutustuminen Reactiin
