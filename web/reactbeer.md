@@ -783,7 +783,40 @@ Kannattaa miettiä muutamaankin kertaan miten tilan päivittäminen hoidetaan al
 
 Ratkaisumme on sikäli hieman ikävä, että se ei ilmoita käyttäjälle operaation onnistumisesta. Olisi ehkä aiheellista lisätä ratkaisuun esim. reactstrapin [alertina](https://reactstrap.github.io/components/alerts/) ilmoitus tyylin onnistuneesta luomisesta. Ratkaisumme ei myöskään nyt toimi hyvin jos tyylin luominen epäonnistuu esim. validointivirheen takia.
 
-Näiden parannusten tekeminen jätetään kuitenkin harjoitustehtäväksi.
+Jos tyylin luominen epäonnistuu, palauttaa palvelin statuskoodin 422 (unprocessable entity) ja validointiin liittyvän virheilmoituksen. 
+
+Muutetaan metodia _createStyle_ siten, että koodi menee omaan _catch_-"haaraan" rekisteröityyn tapahtumankäsittelijään jos palvelin vastaa statuskoodilla, joka ei ole 201 (resource created):
+
+```js
+  createStyle(e) {
+    // ...
+
+    let ensureSuccess = (response) => { 
+      if (response.status == 201)  {  
+        return Promise.resolve(response)  
+      } else {  
+        return response.json().then( data => Promise.reject(data) ) 
+      }  
+    }
+
+    fetch('http://localhost:3001/styles.json', request)
+     .then( ensureSuccess )
+     .then( response => { response.json } )
+     .then( response => {
+        console.log(response)
+        this.toggleVisible()
+        this.props.addStyle(response)
+     }).catch( error => {
+       console.log(error)
+     }); 
+  }
+``
+
+Virheenkäsittelystä vastaavassa callbackmetodissa ei nyt tehdä muuta kuin tulostetaan validointivirheestä kertova ilmoitus konsoliin: 
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer4.png)
+
+Virheilmoituksen näyttäminen web-sivulla jätetään harjoitustehtäväksi.
 
 ## Kirjautuminen palvelimelle
 
@@ -800,5 +833,3 @@ Näiden parannusten tekeminen jätetään kuitenkin harjoitustehtäväksi.
 * ReactRouter
 * Redux
 * Flow
-
-
