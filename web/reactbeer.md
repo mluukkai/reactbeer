@@ -235,9 +235,9 @@ class Header extends React.Component {
   render(){
     return (
       <div>
-        <a href="#" onClick={this.props.beers}>Beers</a>
-        <a href="#" onClick={this.props.styles}>Styles</a>
-        <a href="#" onClick={this.props.login}>Login</a>
+        <a href="#" onClick={this.props.showBeers}>Beers</a>
+        <a href="#" onClick={this.props.showStyles}>Styles</a>
+        <a href="#" onClick={this.props.showLogin}>Login</a>
       </div>
     )
   }
@@ -259,9 +259,9 @@ class App extends Component {
       <div>
         <h1>Reactbeer</h1>
         <Header 
-          beers={this.setVisible("BeersPage").bind(this)}
-          styles={this.setVisible("StylesPage").bind(this)}
-          login={this.setVisible("LoginPage").bind(this)}
+          showBeers={this.setVisible("BeersPage").bind(this)}
+          showStyles={this.setVisible("StylesPage").bind(this)}
+          showLogin={this.setVisible("LoginPage").bind(this)}
         />
         {visiblePageComponent()}
       </div>
@@ -305,13 +305,13 @@ class Header extends React.Component {
           <Collapse navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <NavLink href="#" onClick={this.props.beers}>Beers</NavLink>
+                <NavLink href="#" onClick={this.props.showBeers}>Beers</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="#" onClick={this.props.styles}>Styles</NavLink>
+                <NavLink href="#" onClick={this.props.showStyles}>Styles</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="#" onClick={this.props.login}>Login</NavLink>
+                <NavLink href="#" onClick={this.props.showLogin}>Login</NavLink>
               </NavItem>              
             </Nav>
           </Collapse>
@@ -459,9 +459,11 @@ Ongelmasta päästään eroon lisäämällä tyylin muodostavalle riville avaime
 { styles.map(s => <tr key={s.id}><td>{s.name}</td></tr> ) } 
 ```
 
-## const-elementti
+## Tilaton komponentti
 
-Reactissa on hyvänä käytänteenä eristää kaikki loogiset kokonaisuudet omaksi komponentiksi. Tehdään nyt yksittäisen tyylin renderöinnistä huolehtiva komponentti. Koska komponentti on niin yksinkertainen, määrittelemme sen _const_- eli vakiokomponentiksi, joka teknisesti ottaen sisältää ainoastaan renderöinnin suorittavan metodin määrittelyn:
+Reactissa on hyvänä käytänteenä eristää kaikki loogiset kokonaisuudet omaksi komponentiksi. Tehdään nyt yksittäisen tyylin renderöinnistä huolehtiva komponentti. 
+
+Koska komponentti on erittäin yksinkertainen, määrittelemme sen _tilattomaksi komponentiksi_. Tilattomalla komponentilla ei ole tilaa (state), mutta se voi hyödyntää sille välitettyjä _propseja_. Yksinkertaisuutensa vuoksi tilaton komponentti voidaan määritellä funktiona, joka saa parametriksi propsit ja palauttaa näkymän:
 
 ```js
 const Style = (props) => 
@@ -471,7 +473,9 @@ const Style = (props) =>
   </tr> 
 ```
 
-Const-komponenttia käytetään normaalin komponentin tapaan. _StylesPage_ muuttuu seuraavasti:
+Tilaton komponentti siis ikäänkuin määrittelee ainoastaan komponentin _render_-funktion.
+
+Tilatonta komponenttia käytetään normaalin komponentin tapaan. _StylesPage_ muuttuu seuraavasti:
 
 ```js
 class StylesPage extends React.Component {
@@ -497,18 +501,304 @@ class StylesPage extends React.Component {
 }
 ```
 
-Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/styles_page)
+Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/styles_page_v2)
 
 ## Uuden oluttyylin lisääminen 
 
-```js
-```
+Tehdään seuraavaksi lomake, jonka avulla käyttäjä voi lisätä uuden oluttyylin. Sijoitetaan lomake tyylien sivulle. Määritellään lomake omana komponenttina. Alustava versio seuraavassa:
 
 ```js
+class NewBeerForm extends React.Component {
+  render(){
+    return (
+      <div>
+        <Form>
+          <FormGroup>
+            <Label for="exampleEmail">Name</Label>
+            <Input type="text" name="name" id="name"/>
+          </FormGroup>
+          <FormGroup>
+            <Label for="exampleText">Description</Label>
+            <Input type="textarea" name="description" id="description"  />
+          </FormGroup>
+          <Button>Create style</Button>
+        </Form>
+      </div>
+    )
+  }
+}
 ```
+
+Sijoitetaan lomake tyylien sivun alalaitaan
+
+```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        <Table striped>
+        ...
+        </Table>  
+        <NewBeerForm />
+      </div>
+    )
+  }
+}
+```
+
+Muutetaan lomaketta siten, että se ei ole oletusarvoisesti näkyvissä ja avautuu vasta kun käyttäjä klikkaa sivulle sijoitettavaa nappia. Näkyvyys hoidetaan lisäämällä lomakkeen tilaan _boolean_-arvoinen avain _visible_ jonka arvo määrittää sen näytetäänkö lomake vai lomakkeen avaava nappi.
+
+```js
+class NewBeerForm extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      visible: false
+    }
+  }
+
+  toggleVisible() {
+    this.setState({
+      visible: !this.state.visible
+    })
+  }
+
+  render(){
+    let visibleComponent = () => { 
+      if ( this.state.visible ) {
+        return (
+          <Form>
+           <FormGroup>
+            <Label for="exampleEmail">Name</Label>
+            <Input type="text" name="name" id="name"/>
+          </FormGroup>
+          <FormGroup>
+            <Label for="exampleText">Description</Label>
+            <Input type="textarea" name="description" id="description"  />
+          </FormGroup>
+          <Button color="primary">Create style</Button>
+          <Button color="warning" onClick={this.toggleVisible.bind(this)}>Cancel</Button>
+        </Form>
+        )
+      } else {
+        return <Button color="primary" onClick={this.toggleVisible.bind(this)}>Create new style</Button>
+      }    
+    }
+
+    return (
+      <div>
+        {visibleComponent()}
+      </div>
+    )
+  }
+}
+```
+
+Lomakkeen avaavaan (ja sulkevaan) napiin on nyt lisätty tapahtumankuuntelijaksi funktio joka kääntää tilassa olevan avaimen _visible_ arvon.
+
+Tehdään sitten tapahtumankäsittelijä joka huolehtii uuden tyylin luomisesta. Ensimmäinen versio on seuraava:
+
+
+```js
+  createStyle(e) {
+    e.preventDefault()
+    let form = e.target;
+
+    let data = {
+      name: form.elements['name'].value,
+      description: form.elements['description'].value
+    }
+
+    form.elements['name'].value = ""
+    form.elements['description'].value = ""
+
+    console.log(data)
+  }
+```
+
+Tapahtumankäsittelijä ei vielä lähetä palvelimelle mitään vaan ainoastaan tulostaa luotavan tyylin tiedot konsoliin ja sulkee lomakkeen.
+
+Tapahtumankäsittelijä on sidottu luomisnapin sijaan lomakkeen tapahtumaan _onSubmit_:
+
+```js
+  let visibleComponent = () => { 
+    if ( this.state.visible ) {
+      return (
+        <Form onSubmit={this.createStyle.bind(this)}>
+          ...
+        <Button color="primary">Create style</Button>
+        <Button color="warning" onClick={this.toggleVisible.bind(this)}>Cancel</Button>
+      </Form>
+      )
+    } else {
+      return <Button color="primary" onClick={this.toggleVisible.bind(this)}>Create new style</Button>
+    }    
+  }
+```
+
+Täydennetään tapahtumankäsittelijä tekemään uuden tyylin luova HTTP POST -pyyntö palvelimelle:
+
+```js
+  createStyle(e) {
+    e.preventDefault()
+    let form = e.target;
+
+    let data = {
+      name: form.elements['name'].value,
+      description: form.elements['description'].value
+    }
+
+    let request = {
+      method: 'POST', 
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+
+    fetch('http://localhost:3001/styles.json', request)
+     .then( response => response.json() )
+     .then( response => {
+        console.log(response)
+        this.toggleVisible()
+     })
+
+  }
+```
+
+Uuden tyylin luomisyritys johtaa kuitenkin virheeseen. Konsolissa näyttää seuraavalta:
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer1.png)
+
+Varsinainen syy selviää tutkimalla palvelimen virheilmoitusta:
+
+```
+Started POST "/styles.json" for ::1 at 2017-02-24 13:19:52 +0200
+Processing by StylesController#create as JSON
+  Parameters: {"name"=>"asd", "description"=>"asd", "style"=>{"name"=>"asd", "description"=>"asd"}}
+Can't verify CSRF token authenticity
+Completed 422 Unprocessable Entity in 2ms (ActiveRecord: 0.0ms)
+
+ActionController::InvalidAuthenticityToken (ActionController::InvalidAuthenticityToken):
+  actionpack (4.2.6) lib/action_controller/metal/request_forgery_protection.rb:181:in `handle_unverified_request'
+```
+
+Varsinainen syy selviää esim. [täältä](http://api.rubyonrails.org/classes/ActionController/RequestForgeryProtection.html). Kiertääksemme ongelman, meidän on siis disabloitava oletusarvoisesti päällä oleva CSRF tokenin tarkastus siinä tapauksessa jos palvelimelle lähtettävät pyynnöt sisältävät json-muotoista dataa. 
+
+Operaatio onnistuu esim. muuttamalla ApplicationController-luokkaa seuraavasti:
+
+```js
+class ApplicationController < ActionController::Base
+  protect_from_forgery unless: -> { request.format.json? }
+
+  // ...
+end
+```
+
+Tyylin luominen toimii nyt, mutta sovellus ei toimi aivan halutulla tavalla sillä vaikka uusi tyyli on luotu, ei sovelluksemme osaa renderöidä sitä. Oluttyylit ovat tallessa sovelluksen juurikomponentin _App_ tilassa, ja meidän pitäisi onnistua päivittää tilaa komponentin _NewBeerForm_ sisältä. Tämä onnistuu määrittelemällä juurikomponenttiin tyylin lisäävä funktio:
+
+
+```js
+class App extends Component {
+  //...
+
+  addStyle(style) {
+    this.state.styles.push(style)
+    this.setState({
+      styles: this.state.styles
+    })      
+  }
+
+  //...
+}
+```
+
+ja välittämällä se ensin _StylesPage_-komponentille (propsina nimeltään _addStyle_): 
+
+```js
+class App extends Component {
+  //...
+
+  render() {
+    let visiblePageComponent = () => { 
+      if ( this.state.visible=="BeersPage" ) {
+        return <BeersPage />
+      } else if ( this.state.visible=="StylesPage" ) {
+        return <StylesPage 
+                styles={this.state.styles} 
+                addStyle={this.addStyle.bind(this)}/>
+      } else  {
+        return <LoginPage />
+      }     
+    }
+
+    // ...
+  }
+}
+```
+
+ja edelleen _StylesPage_-komponentilta _NewBeerForm_-komponentille:
+
+```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        <Table striped>
+          // ..
+        </div>Table>
+        <NewBeerForm addStyle={this.props.addStyle}/>
+      </div>
+    )
+  }
+}  
+```
+
+ja nyt metodia voidaan kutsua HTTP POST -kutsun tekevän _fetch_:in takaisinkutsufunktiossa
+
+```js
+
+  createStyle(e) {
+    // ...
+
+    fetch('http://localhost:3001/styles.json', request)
+     .then( response => response.json() )
+     .then( response => {
+        console.log(response)
+        this.toggleVisible()
+        this.props.addStyle(response)
+     })
+
+  }
+```
+
+Ja nyt kaikki tyylin lisäys toimii.
+
+Kannattaa miettiä muutamaankin kertaan miten tilan päivittäminen hoidetaan alikomponenttiin välitettävän funktion avulla. Skenaario ei ole välttämättä ihan suoraviivainen!
+
+Ratkaisumme on sikäli hieman ikävä, että se ei ilmoita käyttäjälle operaation onnistumisesta. Olisi ehkä aiheellista lisätä ratkaisuun esim. reactstrapin [alertina](https://reactstrap.github.io/components/alerts/) ilmoitus tyylin onnistuneesta luomisesta. Ratkaisumme ei myöskään nyt toimi hyvin jos tyylin luominen epäonnistuu esim. validointivirheen takia.
+
+Näiden parannusten tekeminen jätetään kuitenkin harjoitustehtäväksi.
 
 ## Kirjautuminen palvelimelle
 
+```js
+```
+
 ## Deployment
+
+## Pro tips
+
+* debugger
+* komponentit omiin tiedeostoihin
+* Ei logiikkaa komponentteihin
+* ReactRouter
+* Redux
+* Flow
 
 
