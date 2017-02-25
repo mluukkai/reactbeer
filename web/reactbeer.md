@@ -571,11 +571,11 @@ class NewBeerForm extends React.Component {
         return (
           <Form>
            <FormGroup>
-            <Label for="exampleEmail">Name</Label>
+            <Label for="name">Name</Label>
             <Input type="text" name="name" id="name"/>
           </FormGroup>
           <FormGroup>
-            <Label for="exampleText">Description</Label>
+            <Label for="description">Description</Label>
             <Input type="textarea" name="description" id="description"  />
           </FormGroup>
           <Button color="primary">Create style</Button>
@@ -810,7 +810,7 @@ Muutetaan metodia _createStyle_ siten, että koodi menee omaan _catch_-"haaraan"
        console.log(error)
      }); 
   }
-``
+```
 
 Virheenkäsittelystä vastaavassa callbackmetodissa ei nyt tehdä muuta kuin tulostetaan validointivirheestä kertova ilmoitus konsoliin: 
 
