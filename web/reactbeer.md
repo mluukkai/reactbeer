@@ -1119,6 +1119,70 @@ Reactbeerin lopullinen koodi nähtävillä [täällä](https://github.com/mluukk
 
 ## Palvelimen viimeistely
 
+Muutetaan nyt vielä palvelinta siten, että kovakoodatun tokenin sijaan luodaan käyttäjäkohtainen token, joka talletetaan tietokantaan _users_-tauluun.
+
+Ainoa mutos kontrollerien tasolla on seuraava:
+
+```ruby
+class SessionsController < ApplicationController
+  # ...
+
+  def login_api
+    user = User.find_by username: params[:username]
+    if user and user.authenticate(params[:password]) 
+      render json: { token: user.get_token }
+    else
+      render json: { error: "invalid username or pasword " }, status: :unprocessable_entity
+    end
+  end
+
+  # ...
+end
+```
+
+eli palautetaan _user_-olion kertoma token.
+
+Lisätään _users_-tauluun sarake tokenin tallettamiseen seuraavan migraation avulla:
+
+```ruby
+class AddTokenToUser < ActiveRecord::Migration
+  def change
+    add_column :users, :token, :string
+  end
+end
+```  
+
+Luokkaan _User_ tarvittavat muutokset ovat seuraavat:
+
+```ruby
+class User
+  # ...
+
+  def self.get_by_token(token)
+    User.find_by token: token
+  end
+
+  def generate_token
+    begin
+      token = SecureRandom.hex
+    end while User.get_by_token(token)
+    
+    update_attribute :token, token
+  end
+
+  def get_token
+    generate_token unless token
+    token
+  end
+
+  # ...
+end
+```  
+
+Metodi <code>get_token</code> siis palauttaa käyttäjän tokenin, jos tokenia ei vielä ole se generoidaan tokenin uniikkiuden varmistavalla metodilla <code>generate_token</code>
+
+Nyt sovelluksemme toimii kaikilla backendiin määritellyillä käyttäjätunnuksilla.
+
 ## Deployment
 
 ## Pro tips
