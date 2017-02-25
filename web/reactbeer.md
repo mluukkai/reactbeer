@@ -1179,11 +1179,16 @@ class User
 end
 ```  
 
-Metodi <code>get_token</code> siis palauttaa käyttäjän tokenin, jos tokenia ei vielä ole se generoidaan tokenin uniikkiuden varmistavalla metodilla <code>generate_token</code>
+Metodi <code>get_token</code> siis palauttaa käyttäjän tokenin, jos tokenia ei vielä ole se generoidaan tokenin uniikkiuden varmistavalla metodilla <code>generate_token</code>.
 
 Nyt sovelluksemme toimii kaikilla backendiin määritellyillä käyttäjätunnuksilla.
 
 ## Deployment
+
+Deployaa _rails backendin_ uusin versio Herokuun ja vaihda frontendisi käyttämään localhostin sijaan Herokussa olevaa backendia.
+
+Saat deployattua forntendin helpoiten Herokuun noudattamalla
+[tätä](https://github.com/mars/create-react-app-buildpack) ohjetta.
 
 ## Pro tips
 
