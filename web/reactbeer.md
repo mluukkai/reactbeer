@@ -818,18 +818,316 @@ Virheenkäsittelystä vastaavassa callbackmetodissa ei nyt tehdä muuta kuin tul
 
 Virheilmoituksen näyttäminen web-sivulla jätetään harjoitustehtäväksi.
 
+Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/style_creation)
+
 ## Kirjautuminen palvelimelle
 
-```js
+Tehdään sovellukseemme vielä lopuksi toiminnallisuus, jonka avulla käyttäjä pystyy autentikoitumaan, eli "kirjautumaan palvelimelle".
+
+Toteutamme autentikoinnin ns. token-autentikointina, jonka periaatetta selitetään esim. [tässä videossa](https://www.youtube.com/watch?v=woNZJMSNbuo). 
+
+Ideana autentikoinnissa on se, että käyttäjänimi (username) ja salasana (password) lähetetään frontendistä HTTP POST:in avulla osoitteeseen palvelimelle.
+
+Jos autentikointi onnistuu, palauttaa palvelin _tokenin_, jos ei, palauttaa palvelin HTTP statuskoodin 422 (Unprocessable Entity).
+
+Onnistuneen autentikoinnin yhteydessä frontend tallettaa tokenin ja liittää sen mukaan kaikkiin palvelimelle meneviin pyyntöihin. 
+
+Jos palvelimelle tehdään pyyntö, joka on sallittu vain kirjautuneille käyttäjille, palvelin tarkastaa liittyykö pyyntöön validi token
+jos ei, vastaa palvelin HTTP statuskoodilla 401 (unauthorized).
+
+Kun käyttäjä loggaa ulos sovelluksesta, pyytää fronend palvelinta mitätöimään tokenin.
+Mitätöinti voi tapahtua myös kuluneen ajan perusteella.
+Sovelluksemme backend olettaa, että AT on liitetty pyynnön auth-token headeriin.
+
+Toteuttaaksemme token-autentikaation tarvitsemme muutoksia myös palvelimelle. Aloitetaan niistä.
+
+Listätään route kirjautumista varten
+
+```ruby
+post 'login_api', to: 'sessions#login_api' 
 ```
+
+ja sitä vastaavaan kontrollerimetodin alustava, tässä vaiheessa kovakoodatun tokenin palauttava versio:
+
+```ruby
+class SessionsController < ApplicationController
+  # ...
+
+  def login_api
+    user = User.find_by username: params[:username]
+    if user and user.authenticate(params[:password]) 
+      render json: { token: 'salainen_token' }
+    else
+      render json: { error: "invalid username or pasword " }, status: :unprocessable_entity
+    end
+  end
+
+  # ...
+end
+```
+
+Tehdään seuraavaksi lomake komponenttiin _Login_:
+
+
+```js
+  render(){
+    return (
+      <div>
+        <Form onSubmit={this.login.bind(this)}>
+          <FormGroup>
+            <Label for="username">username</Label>
+            <Input type="text" name="username" id="username" />
+          </FormGroup>
+          <FormGroup>
+            <Label for="password">password</Label>
+            <Input type="password" name="password" id="password" />
+          </FormGroup>
+          <Button color="primary">Login</Button>
+        </Form>
+      </div>
+    )
+  }
+```
+
+ja kirjautumisesta huolehtiva callback-metodi:
+
+```js
+class LoginPage extends React.Component {
+  login(e) {
+    e.preventDefault()
+    let form = e.target;
+
+    let data = {
+      username: form.elements['username'].value,
+      password: form.elements['password'].value
+    }
+
+    let request = {
+      method: 'POST', 
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+
+    let ensureSuccess = (response) => { 
+      if (response.status == 200) {  
+        return Promise.resolve(response)  
+      } else {  
+        return response.json().then( data => Promise.reject(data) ) 
+      }  
+    }
+
+    fetch('http://localhost:3001/login_api', request)
+     .then( ensureSuccess )
+     .then( response => response.json() )
+     .then( response => {
+        console.log(response)
+        window.r = response
+        form.elements['username'].value = ""
+        form.elements['password'].value = ""   
+        this.props.setTokenAndUser(response.token, data.username)
+     }).catch( error => {
+       console.log(error)
+     });   
+  }
+```
+
+Metodi on pienin muutoksin copypastettu tyylin luovasta metodista. Operaation onnistuessa metodi käyttää komponentille propseina välitettyä komponentin _App_ tilaa muuttavaa metodia _setTokenAndUser_ joka tallettaa tokenin ja käyttäjätunnuksen _App_-komponentin tilaan:
+
+```js
+class App extends Component {
+  // ...
+
+  setTokenAndUser(token, username) {
+    this.setState({
+      token: token,
+      username: username,
+      visible: 'WelcomePage'
+    })      
+  }
+
+  // ...
+
+  render() {
+    let visiblePageComponent = () => { 
+      if ( this.state.visible=="BeersPage" ) {
+        return <BeersPage />
+      } else if ( this.state.visible=="StylesPage" ) {
+        return <StylesPage 
+                styles={this.state.styles} 
+                addStyle={this.addStyle.bind(this)}/>
+      } else if ( this.state.visible=="LoginPage" )  {
+        return <LoginPage setTokenAndUser={this.setTokenAndUser.bind(this)}/>
+      } else {
+        return <WelcomePage username={this.state.username} />
+      }      
+    }
+
+    // ...
+  }      
+}
+```
+
+Kirjautuminen päättyy yksinkertaisen _WelcomePage_-komponentin renderöimiseen:
+
+```js
+const WelcomePage = (props) => 
+  <Alert color="success">
+    Welcome back {props.username}
+  </Alert> 
+```
+
+## Autentikoitu pyyntö
+
+Muutetaan nyt tyylien luomista siten, että palvelin sallii luomisen ainoastaan jos pyyntö on autentikoitu, eli sisältää autentikaatiotokenin. Päätetään välittää autentikaatiotoken headerin _Authorization_ arvona. Tehdään palvelimelle seuraava muutos:
+
+```ruby
+class StylesController < ApplicationController
+  # ...
+
+  def create
+    @style = Style.new(style_params)
+
+    if request.format.json?
+      user = User.get_by_token(request.headers["Authorization"])
+      if user.nil?
+        return render json: { error: "no valid token in request" }, status: :unauthorized
+      end
+    end
+    
+    respond_to do |format|
+      if @style.save
+        format.html { redirect_to @style, notice: 'Style was successfully created.' }
+        format.json { render :show, status: :created, location: @style }
+      else
+        format.html { render :new }
+        format.json { render json: @style.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+end
+```
+
+Eli siinä tapauksessa että pyynnön datan formaatti on json (eli pyyntö ei tule railsin generoimasta templatesta) otetaan pyynnön headerista token komennolla <code>request.headers["Authorization"]</code> ja kysytään luokkaan <code>User</code> toteutetulta metodilta mitä käyttäjää token vastaa. Jos metodi palauttaa nil eli tokenia ei ollut tai kyseessä ei ollut validi token, palautetaan virheilmoitus. Jos token oli validi, jatketaan pyynnön käsittelyä ja luodaan uusi tyyli.
+
+Luokan <code>User</code> metodi <code>get_by_token</code> toimii nyt siten, että jos token on  kovakoodattu _salainen_token_, palautetaan ensimmäinen käyttäjä, muussa tapauksessa _nil_:
+
+```ruby
+class User < ActiveRecord::Base
+  # ...
+
+  def self.get_by_token(token)
+    return User.first if token=='salainen_token'
+    nil
+  end
+
+  # ...
+end
+```
+
+Kun nyt kokeilemme uuden tyylin luomista, se ei toimi sillä vaikka olemme kirjautuneena, ei tokenia vielä lisätä pyyntöön:
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer5.png)
+
+Eli lisätään token pyynnön headerin _Authorization_ arvoksi. Komponenttiin _NewBeerForm_ tarvitaan ainoastaan pieni lisäys:
+
+```js
+class NewBeerForm extends React.Component {
+   // ...
+
+  createStyle(e) {
+    // ...
+
+    let request = {
+      method: 'POST', 
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': this.props.token,
+      },
+      body: JSON.stringify(data)
+    };
+
+  // ...  
+  }
+
+  // ... 
+}
+```
+
+Komponentille pitää siis välittää token propsien avulla. Token on komponentin _App_ tilassa, eli se pitää välittää komponentin _StylesPage_ kautta:
+
+```js
+class StylesPage extends React.Component {
+  render(){
+    let styles = this.props.styles
+    return (
+      <div>
+        <h2>Styles</h2>  
+        <NewBeerForm addStyle={this.props.addStyle} token={this.props.token}/>
+        <Table striped>
+          // ...
+        </Table>  
+      </div>
+    )
+  }
+}          
+```
+
+ja komponenttiin _App_ tarvittavat muutokset:
+
+```js
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      visible: "LoginPage",
+      styles: [],
+      username: '',
+      token: ''
+    }
+  }
+
+  // ...
+
+  render() {
+    let visiblePageComponent = () => { 
+      console.log(this.state.visible)
+      if ( this.state.visible=="BeersPage" ) {
+        return <BeersPage />
+      } else if ( this.state.visible=="StylesPage" ) {
+        return <StylesPage 
+                styles={this.state.styles} 
+                addStyle={this.addStyle.bind(this)}
+                token={this.state.token}/>
+      } else if ( this.state.visible=="LoginPage" )  {
+        return <LoginPage setTokenAndUser={this.setTokenAndUser.bind(this)}/>
+      } else {
+        return <WelcomePage username={this.state.username} />
+      }    
+    }
+
+    // ...
+  }
+}    
+```
+
+Reactbeerin lopullinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/login)
+
+## Palvelimen viimeistely
 
 ## Deployment
 
 ## Pro tips
 
 * debugger
+* postman
 * komponentit omiin tiedeostoihin
 * Ei logiikkaa komponentteihin
+  * refaktoroi palvelimen kanssa keskustelu
 * ReactRouter
 * Redux
 * Flow
