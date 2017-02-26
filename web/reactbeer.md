@@ -505,7 +505,7 @@ Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/ml
 
 ## Uuden oluttyylin lisääminen 
 
-Tehdään seuraavaksi lomake, jonka avulla käyttäjä voi lisätä uuden oluttyylin. Sijoitetaan lomake tyylien sivulle. Määritellään lomake omana komponenttina. Alustava versio seuraavassa:
+Tehdään seuraavaksi lomake, jonka avulla käyttäjä voi lisätä uuden oluttyylin. Sijoitetaan lomake tyylien sivulle. Määritellään lomake omana komponenttina. Alustava versio seuraavassa (lomakkeen nimeksi tuli vahingossa _NewBeerForm_):
 
 ```js
 class NewBeerForm extends React.Component {
@@ -596,9 +596,9 @@ class NewBeerForm extends React.Component {
 }
 ```
 
-Lomakkeen avaavaan (ja sulkevaan) napiin on nyt lisätty tapahtumankuuntelijaksi funktio joka kääntää tilassa olevan avaimen _visible_ arvon.
+Lomakkeen avaavaan (ja sulkevaan) nappiin on nyt lisätty tapahtumankuuntelijaksi funktio joka kääntää tilassa olevan avaimen _visible_ arvon.
 
-Tehdään sitten tapahtumankäsittelijä joka huolehtii uuden tyylin luomisesta. Ensimmäinen versio on seuraava:
+Tehdään sitten tapahtumankäsittelijä, joka huolehtii uuden tyylin luomisesta. Ensimmäinen versio on seuraava:
 
 
 ```js
@@ -698,7 +698,7 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-Tyylin luominen toimii nyt, mutta sovellus ei toimi aivan halutulla tavalla sillä vaikka uusi tyyli on luotu, ei sovelluksemme osaa renderöidä sitä. Oluttyylit ovat tallessa sovelluksen juurikomponentin _App_ tilassa, ja meidän pitäisi onnistua päivittää tilaa komponentin _NewBeerForm_ sisältä. Tämä onnistuu määrittelemällä juurikomponenttiin tyylin lisäävä funktio:
+Tyylin luominen toimii nyt, mutta sovellus ei toimi aivan halutulla tavalla: sillä vaikka uusi tyyli on luotu, ei sovelluksemme osaa renderöidä sitä. Oluttyylit ovat tallessa sovelluksen juurikomponentin _App_ tilassa, ja meidän pitäisi onnistua päivittää tilaa komponentin _NewBeerForm_ sisältä. Tämä onnistuu määrittelemällä juurikomponenttiin tyylin lisäävä funktio:
 
 
 ```js
@@ -820,6 +820,7 @@ Virheilmoituksen näyttäminen web-sivulla jätetään harjoitustehtäväksi.
 
 Reactbeerin tähänastinen koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/style_creation)
 
+
 ## Kirjautuminen palvelimelle
 
 Tehdään sovellukseemme vielä lopuksi toiminnallisuus, jonka avulla käyttäjä pystyy autentikoitumaan, eli "kirjautumaan palvelimelle".
@@ -835,7 +836,7 @@ Onnistuneen autentikoinnin yhteydessä frontend tallettaa tokenin ja liittää s
 Jos palvelimelle tehdään pyyntö, joka on sallittu vain kirjautuneille käyttäjille, palvelin tarkastaa liittyykö pyyntöön validi token
 jos ei, vastaa palvelin HTTP statuskoodilla 401 (unauthorized).
 
-Kun käyttäjä loggaa ulos sovelluksesta, pyytää fronend palvelinta mitätöimään tokenin.
+Kun käyttäjä loggaa ulos sovelluksesta, pyytää frontnd palvelinta mitätöimään tokenin.
 Mitätöinti voi tapahtua myös kuluneen ajan perusteella.
 Sovelluksemme backend olettaa, että AT on liitetty pyynnön auth-token headeriin.
 
@@ -1121,7 +1122,7 @@ Reactbeerin lopullinen koodi nähtävillä [täällä](https://github.com/mluukk
 
 Muutetaan nyt vielä palvelinta siten, että kovakoodatun tokenin sijaan luodaan käyttäjäkohtainen token, joka talletetaan tietokantaan _users_-tauluun.
 
-Ainoa mutos kontrollerien tasolla on seuraava:
+Ainoa muutos kontrollerien tasolla on seuraava:
 
 ```ruby
 class SessionsController < ApplicationController
@@ -1187,7 +1188,7 @@ Nyt sovelluksemme toimii kaikilla backendiin määritellyillä käyttäjätunnuk
 
 Deployaa _rails backendin_ uusin versio Herokuun ja vaihda frontendisi käyttämään localhostin sijaan Herokussa olevaa backendia.
 
-Saat deployattua forntendin helpoiten Herokuun noudattamalla
+Saat deployattua frontendin helpoiten Herokuun noudattamalla
 [tätä](https://github.com/mars/create-react-app-buildpack) ohjetta.
 
 ## Pro tips
@@ -1208,9 +1209,9 @@ Kun olet tekemässä pyyntöjä backendiin, kannattaa ehdottomasti ensin kokeill
 
 Koodissamme on muutamiakin ongelmia. Ensinnäkin kaikki komponentit on kirjoitettu samaan tiedostoon. Reactia kirjoitettaessa on tapana tehdä jokainen komponentista moduuli ja sijoittaa se omaan tiedostoonsa hakemistoon _src/components_. Modulissa määriteltyä komponenttia käytettäessä se on ensin importoitava. Ks. lisää modulien [importtaamisesta ](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) [eksporttaamisesta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export)
 
-Olemme kirjoittaneet palvelimelle HTTP-pyyntöjä tekevän koodi (funktio _fetch_) suoraan näkymäkomponentteihin. Kyseessä ei tietenkään ole järkevä tapa, se rikkoo mm. single responsibility -periaatetta. Palvelimen kanassa keskusteleva koodi on myös järkevä eriyttää omaksi modulikseen.
+Olemme kirjoittaneet palvelimelle HTTP-pyyntöjä tekevän koodin (funktio _fetch_) suoraan näkymäkomponentteihin. Kyseessä ei tietenkään ole järkevä tapa, se rikkoo mm. single responsibility -periaatetta. Palvelimen kanssa keskusteleva koodi on myös järkevä eriyttää omaksi modulikseen.
 
-Osittain refakotoroitu koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/refactoring). Koodissa ainoastaan lääkomponentit (esim. _StylesPage_) on eroteltu omiin moduuleihinsa, ainoastaan yhden komponentin käyttäät alikomponentit (esim. _Style_) on määritelty pääkomponentin kanssa samassa moduulissa.
+Osittain refaktoroitu koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/refactoring). Koodissa ainoastaan pääkomponentit (esim. _StylesPage_) on eroteltu omiin moduuleihinsa, ainoastaan yhden komponentin käyttämät alikomponentit (esim. _Style_) on määritelty pääkomponentin kanssa samassa moduulissa.
 
 ### Reactia laajentavat kirjastot
 
