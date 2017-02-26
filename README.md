@@ -1,6 +1,6 @@
 # reactbeer
 
-## Voit lukea omalla vastuulla, materiaali on vielä hieman kesken
+## Materiaali on vielä hieman kesken ja teksti on oikolukematonta. Korjaa kun löydät typoja.
 
 [materiaali](https://github.com/mluukkai/reactbeer/blob/master/web/reactbeer.md)
 

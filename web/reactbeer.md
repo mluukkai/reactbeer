@@ -1192,11 +1192,30 @@ Saat deployattua forntendin helpoiten Herokuun noudattamalla
 
 ## Pro tips
 
-* debugger
-* postman
-* komponentit omiin tiedeostoihin
-* Ei logiikkaa komponentteihin
-  * refaktoroi palvelimen kanssa keskustelu
-* ReactRouter
-* Redux
-* Flow
+### debuggaus
+
+Javascriptin debuggaus ei ole välttämättä helppoa. Selaimen javascript-konsolin aktiivinen käyttö on tietysti kaiken lähtökohta. **Konsolin tulee olla ohjelmoidessa koko ajan auki**. Arvailun sijaan kannattaa tulostella asioita konsoliin komennolla _console.log_.
+
+Voit myös pysäyttää koodin mihin kohtaa tahansa kirjoittamalla koodiin komennon _debugger_. Tällöin pääset tutkimaan konsolista komponenttien tilaa ym. Käytännössä _debugger_ toimii hyvin samaan tapaan kuin Railsin debuggeri.
+
+Chromen lisäosana toimiva [react developer tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi) on hyvä apuväline debuggaukseen. Sen avulla on mahdollista tarkkailla komponentteja ja niiden tilaa selaimen developer konsolista: 
+
+![kuva](https://github.com/mluukkai/reactbeer/raw/master/img/reactbeer6.png)
+
+Kun olet tekemässä pyyntöjä backendiin, kannattaa ehdottomasti ensin kokeilla pyyntöjen toimivuutta [postmanilla](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop) ja kutsua backendia omasta koodista vasta siinä vaiheessa kun olet varma, että tiedät minkälaisia headereja ym. backend odottaa.
+
+### Komponenttien ja sovelluslogiikan eristäminen moduuleihin
+
+Koodissamme on muutamiakin ongelmia. Ensinnäkin kaikki komponentit on kirjoitettu samaan tiedostoon. Reactia kirjoitettaessa on tapana tehdä jokainen komponentista moduuli ja sijoittaa se omaan tiedostoonsa hakemistoon _src/components_. Modulissa määriteltyä komponenttia käytettäessä se on ensin importoitava. Ks. lisää modulien [importtaamisesta ](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) [eksporttaamisesta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export)
+
+Olemme kirjoittaneet palvelimelle HTTP-pyyntöjä tekevän koodi (funktio _fetch_) suoraan näkymäkomponentteihin. Kyseessä ei tietenkään ole järkevä tapa, se rikkoo mm. single responsibility -periaatetta. Palvelimen kanassa keskusteleva koodi on myös järkevä eriyttää omaksi modulikseen.
+
+Osittain refakotoroitu koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/refactoring). Koodissa ainoastaan lääkomponentit (esim. _StylesPage_) on eroteltu omiin moduuleihinsa, ainoastaan yhden komponentin käyttäät alikomponentit (esim. _Style_) on määritelty pääkomponentin kanssa samassa moduulissa.
+
+### Reactia laajentavat kirjastot
+
+Kun perusreact on hallinnassa, kannattaa tutustua seuraaviin:
+
+* [Redux](http://redux.js.org/docs/introduction/)
+* [ReactRouter](https://github.com/reactjs/react-router-tutorial)
+* [Flow](https://flowtype.org)
