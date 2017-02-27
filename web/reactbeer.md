@@ -1213,6 +1213,8 @@ Olemme kirjoittaneet palvelimelle HTTP-pyyntöjä tekevän koodin (funktio _fetc
 
 Osittain refaktoroitu koodi nähtävillä [täällä](https://github.com/mluukkai/reactbeer_code/tree/refactoring). Koodissa ainoastaan pääkomponentit (esim. _StylesPage_) on eroteltu omiin moduuleihinsa, ainoastaan yhden komponentin käyttämät alikomponentit (esim. _Style_) on määritelty pääkomponentin kanssa samassa moduulissa.
 
+Käytimme HTTP-pyyntöjen tekemiseen muutamilta osin hieman primitiivistä _fetch_-metodia, joka mm. pakotti kirjoittamaan oman virheenkäsittelyn hoitavan funktion. Olisimme säilyneet hieman helpommalla käyttämällä [Axios](https://github.com/mzabriskie/axios)-kirjastoa.
+
 ### Reactia laajentavat kirjastot
 
 Kun perusreact on hallinnassa, kannattaa tutustua seuraaviin:
